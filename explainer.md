@@ -41,7 +41,7 @@ implement in a portable way for all the reasons listed in the
 [MiniApp example](https://docs.google.com/document/d/11kwtjxXelqsIELtHfXDWLWVPrdGJGdy4yvHu-2mGyn4/edit#heading=h.kho1ejnoqhs7).
 To summarize, swapping content within a single scroller is complicated since
 the scroll offset is shared between two conceptual views; it requires tricks to
-keep the content of multiple views overlayed and we have to manually keep track
+keep the content of multiple views overlaid and we have to manually keep track
 of each view's scroll offset. Likewise, animating transitions becomes tricky
 since the animation have to be timed carefully with the content swap. Simple
 behaviors which emerge naturally from using separate &lt;div>s become difficult
@@ -94,6 +94,12 @@ item-view in the DOM? Here's an example of how we'd do that with this proposal.
 Note that we'd likely want a setter method, rather than making the attribute
 writable, for easier feature detection and failure ergonomics.
 
+Thanks to Dima Voytenko for the 
+[MiniApp example](https://docs.google.com/document/d/11kwtjxXelqsIELtHfXDWLWVPrdGJGdy4yvHu-2mGyn4/edit#heading=h.kho1ejnoqhs7),
+upon which this is based.
+
+Here's the markup:
+
 ```html
   <html>
     <style>
@@ -134,19 +140,20 @@ writable, for easier feature detection and failure ergonomics.
   </html>
 ```
 
+And the script to make the transitioning happen:
+
 ```javascript
   var streamView = document.getElementById('streamView');
   var itemView = document.getElementById('itemView');
 
-  // When the page loads, start with the stream view being the "current view".
-  addEventListener('load', function() {
-    document.setScrollingElement(streamView);
-  });
+  // When the page loads, start with the stream view being the "root scroller".
+  document.setScrollingElement(streamView);
 
-  // Clicking on an item will transition to the item view.
+  // Clicking on an item will fill the item view with the appropriate content
+  // and transition to the item view.
   var itemInStream = document.getElementById('itemInStream');
   itemInStream.addEventListener('click', function() {
-    // Populate the DOM in the item container.
+    // Populate the DOM in the item container using some helper function.
     replaceContent(document.getElementById('item-container'), itemInStream);
 
     // Transition to the item view, making it the root scroller.
@@ -158,6 +165,9 @@ writable, for easier feature detection and failure ergonomics.
     transitionView(document.scrollingElement, streamView);
   });
 
+  // Note how simple this function is; most of it is details about how to fade
+  // and display the views. Since the views are siblings in the DOM and we don't
+  // have to move any DOM around it's a straightforward matter.
   function transitionView(current, target) {
     target.classList.remove('invisible');
     target.classList.add('transitioning');
@@ -182,7 +192,7 @@ writable, for easier feature detection and failure ergonomics.
       });
   }
 
-  // Simple animation to fade-out old view and fade in new one.
+  // Simple animation helper to fade-out old view and fade in new one.
   function animate(duration, mutate, complete) {
     var startTime = new Date().getTime();
     var endTime = startTime + duration;
