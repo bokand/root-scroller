@@ -1,4 +1,4 @@
-# NonBodyRootScroller
+# Non-&lt;body> Root Scrollers
 
 A proposal to allow any scroller to become the *root scroller*. Today's web
 endows the &lt;body> element with special powers (such as hiding the URL bar). This
