@@ -19,14 +19,14 @@ author to animate transitions between these views and manage them as independent
 components.
 
 On the other hand, browsers have given essential UX features exclusively to one
-special element: the &lt;body> element. Here are some examples of how &ltbody>
+special element: the &lt;body> element. Here are some examples of how &lt;body>
 is special:
 
   * URL-bar Hiding - To maximize the user's screen real-estate, the browser's
     URL-bar is hidden when the &lt;body> element is scrolled down.
   * Overscroll Affordance - To let the user know the page content is fully
     scrolled, further scrolls generate a "glow" or "rubber-banding" effect. In
-    Chrome, this only occurs on the <body> element.
+    Chrome, this only occurs on the &lt;body> element.
   * Pull-to-Refresh - To allow the user to quickly refresh the page, scrolling
     the &lt;body> element up beyond the content top activates a refresh action
     in Chrome. Chrome disables this effect when the &lt;body> element isn't
@@ -54,16 +54,17 @@ element.
 
 We need to provide authors some way to make the intuitive "each view is a div"
 solution workable. This means giving an arbitrary scroller the same powers as
-the &lt;body>; anointing it the *root scroller*. One option is to apply a
-heuristic and make an element the root scroller; for example, if it's a
-scrollable element that fills the viewport. This has some compatibility risk
-(a page might rely on the fact that a non-body element doesn't show overscroll)
-and risks further browser interop issues: Safari (alone) already has this kind
-of heuristic applied to viewport filling &lt;iframe> elements allowing URL bar
-hiding.
+the &lt;body>; anointing it the *root scroller*.
+
+One option is to apply a heuristic and make an element the root scroller; for
+example, if it's a scrollable element that fills the viewport. This has some
+compatibility risk (a page might rely on the fact that a non-body element
+doesn't show overscroll) and risks further browser interop issues: Safari
+(alone) already has this kind of heuristic applied to viewport filling
+&lt;iframe> elements allowing URL bar hiding.
 
 Therefore, I propose an explicit mechanism to allow the author to specify which
-element should be the root scroller and, importantly, *when*.
+element should be treated as the root scroller and, importantly, *when*.
 
 ## document.scrollingElement
 
