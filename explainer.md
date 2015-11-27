@@ -70,7 +70,7 @@ element should be treated as the root scroller and, importantly, *when*.
 
 The web platform recently introduced
 [document.scrollingElement](https://drafts.csswg.org/cssom-view/#dom-document-scrollingelement).
-The read-only scrollingElement attribute was added as an helper to ease
+The read-only scrollingElement attribute was added as a helper to ease
 transition for sites while WebKit-based/derived browsers fixed an
 [age-old interop issue](https://dev.opera.com/articles/fixing-the-scrolltop-bug/).
 Basically, different browsers designated different elements as the root
@@ -78,8 +78,8 @@ scrolling element (aka "viewport"). WebKit based browsers (including Chrome
 and Opera) apply root scrolling to the &lt;body> element while IE and Firefox
 comply with the specification and apply scrolling to the root element. To ease
 the transition for when Blink and WebKit fix the bug, document.scrollingElement
-will return the element that's used as the root scroller: &lt;body> on
-WebKit/Blink and &lt;html> in the rest.
+returns the element that's used as the root scroller: &lt;body> on WebKit/Blink
+and &lt;html> in the rest.
 
 This sounds an suspiciously like what was described above: different elements
 acting as the root scroller. What if we allowed *setting* the scrollingElement?
@@ -128,6 +128,7 @@ Here's the markup:
       }
     </style>
     <body>
+      <!--Notice: The body element itself has no scrolling, only the views scroll-->
       <div id="streamView" class="view">
         <div>
           <!--CONTENT GOES HERE-->
