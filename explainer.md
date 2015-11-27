@@ -10,7 +10,7 @@ Applications are typically composed of multiple *views* between which a user can
 transition. Traditionally, a web app would transition between its views by
 navigating to a new page. This causes a round trip to the server and a jarring
 experience for the user. To improve performance and allow for pleasing
-transitions, the author may wish to keep multiple views in the same DOM,
+transitions, the author may wish to keep multiple views within the DOM,
 removing the need to navigate to a new document.
 
 Authors can do this today by making each view out of a viewport-sized,
@@ -19,12 +19,14 @@ author to animate transitions between these views and manage them as independent
 components.
 
 On the other hand, browsers have given essential UX features exclusively to one
-special element: the &lt;body> element. Here are some examples:
+special element: the &lt;body> element. Here are some examples of how &ltbody>
+is special:
 
   * URL-bar Hiding - To maximize the user's screen real-estate, the browser's
     URL-bar is hidden when the &lt;body> element is scrolled down.
   * Overscroll Affordance - To let the user know the page content is fully
-    scrolled, further scrolls generate a "glow" or "rubber-banding" effect.
+    scrolled, further scrolls generate a "glow" or "rubber-banding" effect. In
+    Chrome, this only occurs on the <body> element.
   * Pull-to-Refresh - To allow the user to quickly refresh the page, scrolling
     the &lt;body> element up beyond the content top activates a refresh action
     in Chrome. Chrome disables this effect when the &lt;body> element isn't
@@ -36,7 +38,7 @@ special element: the &lt;body> element. Here are some examples:
 
 Thus, authors have a choice: use the intuitive method and lose all these
 essential UX features, or swap the *content* of each view in and out of the
-&lt; body element. The latter turns out to be surprisingly difficult to
+&lt;body> element. The latter turns out to be surprisingly difficult to
 implement in a portable way for all the reasons listed in the
 [MiniApp example](https://docs.google.com/document/d/11kwtjxXelqsIELtHfXDWLWVPrdGJGdy4yvHu-2mGyn4/edit#heading=h.kho1ejnoqhs7).
 To summarize, swapping content within a single scroller is complicated since
@@ -45,12 +47,12 @@ keep the content of multiple views overlaid and we have to manually keep track
 of each view's scroll offset. Likewise, animating transitions becomes tricky
 since the animation have to be timed carefully with the content swap. Simple
 behaviors which emerge naturally from using separate &lt;div>s become difficult
-and complicated to implement since we have to share the special &lt;body>
+and complicated to implement when forced to share the special &lt;body>
 element.
 
 ## Proposed Solution
 
-We need to provide authors some way to make the intuitive, "each view is a div",
+We need to provide authors some way to make the intuitive "each view is a div"
 solution workable. This means giving an arbitrary scroller the same powers as
 the &lt;body>; anointing it the *root scroller*. One option is to apply a
 heuristic and make an element the root scroller; for example, if it's a
@@ -61,7 +63,7 @@ of heuristic applied to viewport filling &lt;iframe> elements allowing URL bar
 hiding.
 
 Therefore, I propose an explicit mechanism to allow the author to specify which
-element should be the root scroller and just as importantly, *when*.
+element should be the root scroller and, importantly, *when*.
 
 ## document.scrollingElement
 
@@ -72,7 +74,7 @@ transition for sites while WebKit-based/derived browsers fixed an
 [age-old interop issue](https://dev.opera.com/articles/fixing-the-scrolltop-bug/).
 Basically, different browsers designated different elements as the root
 scrolling element (aka "viewport"). WebKit based browsers (including Chrome
-and Opera) apply root scrolling to the &ltbody> element while IE and Firefox
+and Opera) apply root scrolling to the &lt;body> element while IE and Firefox
 comply with the specification and apply scrolling to the root element. To ease
 the transition for when Blink and WebKit fix the bug, document.scrollingElement
 will return the element that's used as the root scroller: &lt;body> on
@@ -84,19 +86,20 @@ This would be conceptually compatible with the meaning of scrollingElement. It
 should represent to root-most scroller so that scrolls can be set and read from
 script in a uniform way.
 
-### Example
-
-Here's a common application on the web, a (potentially-infinite) stream that
-lets you open up an item when you tap on one. Since the stream is infinite,
-navigating to a new page when you tap an item means lots of work to recreate the
-stream when the user navigates back to the stream. What if we could keep the
-item-view in the DOM? Here's an example of how we'd do that with this proposal.
 Note that we'd likely want a setter method, rather than making the attribute
 writable, for easier feature detection and failure ergonomics.
 
-Thanks to Dima Voytenko for the 
+### Example
+
+Here's a common application on the web: a (potentially-infinite) stream of items
+that lets you open one up when you click on it. Since the stream is infinite,
+navigating to a new page when you open an item means lots of work to recreate the
+stream when the user navigates back. What if we could keep the item-view in the
+DOM all along? Here's an example of how we'd do that with this proposal:
+
+*Thanks to Dima Voytenko for the 
 [MiniApp example](https://docs.google.com/document/d/11kwtjxXelqsIELtHfXDWLWVPrdGJGdy4yvHu-2mGyn4/edit#heading=h.kho1ejnoqhs7),
-upon which this is based.
+upon which this is based.*
 
 Here's the markup:
 
