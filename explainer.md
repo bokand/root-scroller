@@ -96,7 +96,7 @@ DOM all along? Here's an example of how we'd do that with this proposal:
 
 *Thanks to Dima Voytenko for the 
 [MiniApp example](https://docs.google.com/document/d/11kwtjxXelqsIELtHfXDWLWVPrdGJGdy4yvHu-2mGyn4/edit#heading=h.kho1ejnoqhs7),
-upon which this is based. These problems came from his experience in trying to make
+upon which this is based. This example comes from his experience in trying to make
 this work in G+, Google Photos, and the AMP project.*
 
 Here's the markup:
