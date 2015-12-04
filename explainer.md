@@ -175,44 +175,22 @@ And the script to make the transitioning happen:
     target.classList.remove('invisible');
     target.classList.add('transitioning');
     target.style.opacity = 0;
+    
+    var animation = new SequenceEffect([
+      new KeyframeEffect(current, [ {opacity: 1}, {opacity:0} ], {fill: 'forwards', duration: 500}),
+      new KeyframeEffect(target, [ {opacity: 0}, {opacity:1} ], {fill: 'forwards', duration: 500}),
+    ]);
 
-    animate(1000, function step(time) {
-        if (time < 0.5) {
-          current.style.opacity = 1 - time * 2;
-        } else {
-          current.style.opacity = 0;
-          target.style.opacity = (time - 0.5) * 2;
-        }
-      }, function complete() {
-        // When the transition is complete, make the "current view" visible.
-        current.classList.add('invisible');
-        target.classList.remove('transitioning');
-        current.style.opacity = 1;
-        target.style.opacity = 1;
+    document.timeline.play(animation).finished.then(function() {
+      // When the transition is complete, make the "current view" visible.
+      current.classList.add('invisible');
+      target.classList.remove('transitioning');
+      current.style.opacity = 1;
+      target.style.opacity = 1;
 
-        // Mark the newly current view as the root scroller so it gets all the
-        // nice browser UX features.
-        document.setScrollingElement(target);
-      });
-  }
-
-  // Simple animation helper to fade-out old view and fade in new one.
-  function animate(duration, mutate, complete) {
-    var startTime = new Date().getTime();
-    var endTime = startTime + duration;
-
-    function step() {
-      var now = new Date().getTime();
-      var norm = (now - startTime) / duration;
-      norm = Math.min(1, norm);
-      mutate(norm);
-      if (norm < 1) {
-        requestAnimationFrame(step);
-      } else {
-        complete();
-      }
-    }
-
-    requestAnimationFrame(step);
+      // Mark the newly current view as the root scroller so it gets all the
+      // nice browser UX features.
+      document.setScrollingElement(target);
+    });
   }
 ```
