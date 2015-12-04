@@ -1,8 +1,8 @@
-# Non-&lt;body> Root Scrollers
+# Non-Document Root Scrollers
 
-Non &lt;body> root scrollers is a proposed feature that would allow an author to
+Non document root scrollers is a proposed feature that would allow an author to
 endow an arbitrary scrolling element with the same specialness currently
-assigned to the &lt;body> element.
+assigned to the documentElement.
 
 ## The Problem
 
@@ -19,26 +19,24 @@ author to animate transitions between these views and manage them as independent
 components.
 
 On the other hand, browsers have given essential UX features exclusively to one
-special element: the &lt;body> element. Here are some examples of how &lt;body>
-is special:
+special element: the documentElement (&lt;html>). Here are some examples of how
+&lt;html> is special:
 
   * URL-bar Hiding - To maximize the user's screen real-estate, the browser's
-    URL-bar is hidden when the &lt;body> element is scrolled down.
+    URL-bar is hidden when the documentElement element is scrolled down.
   * Overscroll Affordance - To let the user know the page content is fully
     scrolled, further scrolls generate a "glow" or "rubber-banding" effect. In
-    Chrome, this only occurs on the &lt;body> element.
+    Chrome, this only occurs on the documentElement.
   * Pull-to-Refresh - To allow the user to quickly refresh the page, scrolling
-    the &lt;body> element up beyond the content top activates a refresh action
-    in Chrome. Chrome disables this effect when the &lt;body> element isn't
+    the documentElement up beyond the content top activates a refresh action
+    in Chrome. Chrome disables this effect when the documentElement isn't
     scrollable.
   * Spacebar to Scroll - Many browsers use the spacebar as a shortcut to
-    scroll down by a page. This often only works for the &lt;body> element.
-  * Accessibility - Safari's VoiceOver 3-finger swipe to scroll targets only
-    the &lt;body> element.
+    scroll down by a page. This often only works for the documentElement.
 
 Thus, authors have a choice: use the intuitive method and lose all these
 essential UX features, or swap the *content* of each view in and out of the
-&lt;body> element. The latter turns out to be surprisingly difficult to
+documentElement. The latter turns out to be surprisingly difficult to
 implement in a portable way for all the reasons listed in the
 [MiniApp example](https://docs.google.com/document/d/11kwtjxXelqsIELtHfXDWLWVPrdGJGdy4yvHu-2mGyn4/edit#heading=h.kho1ejnoqhs7).
 To summarize, swapping content within a single scroller is complicated since
@@ -47,24 +45,22 @@ keep the content of multiple views overlaid and we have to manually keep track
 of each view's scroll offset. Likewise, animating transitions becomes tricky
 since the animation have to be timed carefully with the content swap. Simple
 behaviors which emerge naturally from using separate &lt;div>s become difficult
-and complicated to implement when forced to share the special &lt;body>
-element.
+and complicated to implement when forced to share the special documentElement.
 
 ## Proposed Solution
 
+
+
 We need to provide authors some way to make the intuitive "each view is a div"
 solution workable. This means giving an arbitrary scroller the same powers as
-the &lt;body>; anointing it the *root scroller*.
+the documentElement; anointing it the *root scroller*. Lets make the documentElement
+less special. The web is the only UI framework that gives special powers to one, and
+only one, special scrolling element.
 
-One option is to apply a heuristic and make an element the root scroller; for
-example, if it's a scrollable element that fills the viewport. This has some
-compatibility risk (a page might rely on the fact that a non-body element
-doesn't show overscroll) and risks further browser interop issues: Safari
-(alone) already has this kind of heuristic applied to viewport filling
-&lt;iframe> elements allowing URL bar hiding.
-
-Therefore, I propose an explicit mechanism to allow the author to specify which
-element should be treated as the root scroller and, importantly, *when*.
+I propose an explicit mechanism to allow the author to specify which element should
+be treated as the root scroller and, importantly, *when*. This will go some way to
+*explaining* how the page interacts with browser UI and give authors a some ways to
+control those interactions.
 
 ## document.scrollingElement
 
@@ -73,11 +69,11 @@ The web platform recently introduced
 The read-only scrollingElement attribute was added as a helper to ease
 transition for sites while WebKit-based/derived browsers fixed an
 [age-old interop issue](https://dev.opera.com/articles/fixing-the-scrolltop-bug/).
-Basically, different browsers designated different elements as the root
+Basically, different browsers designate different elements as the root
 scrolling element (aka "viewport"). WebKit based browsers (including Chrome
 and Opera) apply root scrolling to the &lt;body> element while IE and Firefox
-comply with the specification and apply scrolling to the root element. To ease
-the transition for when Blink and WebKit fix the bug, document.scrollingElement
+comply with the specification and apply scrolling to the root element (&lt;html>).
+To ease the transition for when Blink and WebKit fix the bug, document.scrollingElement
 returns the element that's used as the root scroller: &lt;body> on WebKit/Blink
 and &lt;html> in the rest.
 
@@ -87,8 +83,8 @@ This would be conceptually compatible with the meaning of scrollingElement. It
 should represent to root-most scroller so that scrolls can be set and read from
 script in a uniform way.
 
-Note that we'd likely want a setter method, rather than making the attribute
-writable, for easier feature detection and failure ergonomics.
+*Note: We'd likely want a setter method, rather than making the attribute
+writable, for easier feature detection and failure ergonomics.*
 
 ### Example
 
@@ -100,7 +96,8 @@ DOM all along? Here's an example of how we'd do that with this proposal:
 
 *Thanks to Dima Voytenko for the 
 [MiniApp example](https://docs.google.com/document/d/11kwtjxXelqsIELtHfXDWLWVPrdGJGdy4yvHu-2mGyn4/edit#heading=h.kho1ejnoqhs7),
-upon which this is based.*
+upon which this is based. These problems came from his experience in trying to make
+this work in G+, Google Photos, and the AMP project.*
 
 Here's the markup:
 
@@ -118,6 +115,7 @@ Here's the markup:
         width: 100%;
         height: 100%;
         z-index: 1;
+        overflow: auto;
       }
       .invisible {
         visibility: hidden;
@@ -135,7 +133,7 @@ Here's the markup:
         </div>
       </div>
 
-      <div id="item-view" class="view invisible">
+      <div id="itemView" class="view invisible">
         <div id="backButton" class="button"></div>
         <div id="itemContainer">
           <!--CONTENT GOES HERE-->
@@ -176,6 +174,7 @@ And the script to make the transitioning happen:
   function transitionView(current, target) {
     target.classList.remove('invisible');
     target.classList.add('transitioning');
+    target.style.opacity = 0;
 
     animate(1000, function step(time) {
         if (time < 0.5) {
