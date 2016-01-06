@@ -43,7 +43,7 @@ To summarize, swapping content within a single scroller is complicated since
 the scroll offset is shared between two conceptual views; it requires tricks to
 keep the content of multiple views overlaid and we have to manually keep track
 of each view's scroll offset. Likewise, animating transitions becomes tricky
-since the animation have to be timed carefully with the content swap. Simple
+since the animation must be timed carefully with the content swap. Simple
 behaviors which emerge naturally from using separate &lt;div>s become difficult
 and complicated to implement when forced to share the special documentElement.
 
