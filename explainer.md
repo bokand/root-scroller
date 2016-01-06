@@ -77,7 +77,7 @@ To ease the transition for when Blink and WebKit fix the bug, document.scrolling
 returns the element that's used as the root scroller: &lt;body> on WebKit/Blink
 and &lt;html> in the rest.
 
-This sounds an suspiciously like what was described above: different elements
+This sounds suspiciously like what was described above: different elements
 acting as the root scroller. What if we allowed *setting* the scrollingElement?
 This would be conceptually compatible with the meaning of scrollingElement. It
 should represent to root-most scroller so that scrolls can be set and read from
