@@ -62,29 +62,17 @@ be treated as the root scroller and, importantly, *when*. This will go some way 
 *explaining* how the page interacts with browser UI and give authors a some ways to
 control those interactions.
 
-## document.scrollingElement
+## Proposed API
 
-The web platform recently introduced
-[document.scrollingElement](https://drafts.csswg.org/cssom-view/#dom-document-scrollingelement).
-The read-only scrollingElement attribute was added as a helper to ease
-transition for sites while WebKit-based/derived browsers fixed an
-[age-old interop issue](https://dev.opera.com/articles/fixing-the-scrolltop-bug/).
-Basically, different browsers designate different elements as the root
-scrolling element (aka "viewport"). WebKit based browsers (including Chrome
-and Opera) apply root scrolling to the &lt;body> element while IE and Firefox
-comply with the specification and apply scrolling to the root element (&lt;html>).
-To ease the transition for when Blink and WebKit fix the bug, document.scrollingElement
-returns the element that's used as the root scroller: &lt;body> on WebKit/Blink
-and &lt;html> in the rest.
+  * Add a `rootScroller` attribute on `document`.
 
-This sounds suspiciously like what was described above: different elements
-acting as the root scroller. What if we allowed *setting* the scrollingElement?
-This would be conceptually compatible with the meaning of scrollingElement. It
-should represent to root-most scroller so that scrolls can be set and read from
-script in a uniform way.
+```
+var myScrollerDiv = document.getElementById('myScrollerDiv');
+document.rootScroller = myScrollerDiv;
+```
 
-*Note: We'd likely want a setter method, rather than making the attribute
-writable, for easier feature detection and failure ergonomics.*
+If the set element is a valid scroller, scrolling it should perform all the same actions as the browser performs for document scrolling. E.g. hiding the URL bar, showing overscroll effects, pull-to-refresh, gesture effects, etc.
+
 
 ### Example
 
@@ -150,7 +138,7 @@ And the script to make the transitioning happen:
   var itemView = document.getElementById('itemView');
 
   // When the page loads, start with the stream view being the "root scroller".
-  document.setScrollingElement(streamView);
+  document.rootScroller = streamView;
 
   // Clicking on an item will fill the item view with the appropriate content
   // and transition to the item view.
@@ -160,12 +148,12 @@ And the script to make the transitioning happen:
     replaceContent(document.getElementById('item-container'), itemInStream);
 
     // Transition to the item view, making it the root scroller.
-    transitionView(document.scrollingElement, itemView);
+    transitionView(document.rootScroller, itemView);
   });
 
   // The back button in the item view will take us back to the stream view.
   document.getElementById('backButton').addEventListener('click', function() {
-    transitionView(document.scrollingElement, streamView);
+    transitionView(document.rootScroller, streamView);
   });
 
   // Note how simple this function is; most of it is details about how to fade
@@ -190,7 +178,7 @@ And the script to make the transitioning happen:
 
       // Mark the newly current view as the root scroller so it gets all the
       // nice browser UX features.
-      document.setScrollingElement(target);
+      document.rootScroller = target;
     });
   }
 ```
