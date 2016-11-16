@@ -71,7 +71,26 @@ var myScrollerDiv = document.getElementById('myScrollerDiv');
 document.rootScroller = myScrollerDiv;
 ```
 
-If the set element is a valid scroller, scrolling it should perform all the same actions as the browser performs for document scrolling. E.g. hiding the URL bar, showing overscroll effects, pull-to-refresh, gesture effects, etc.
+If the set element is a valid(\*) scroller, scrolling it should perform all the same actions as the browser performs for document scrolling. E.g. hiding the URL bar, showing overscroll effects, pull-to-refresh, gesture effects, etc. If
+no element is set as the `document.rootScroller`, the browser defaults to using the `document.scrollingElement` and
+behavior is unchanged from today.
+
+(\*) For some - yet undetermined - definition of valid. Chrome's experimental implementation requires the element to be scrollable and exactly fill the viewport.
+
+
+### \<iframes\>
+
+When a page sets an \<iframe\> element as the root scroller, e.g:
+
+```
+<iframe id="myIframe" src="..."></iframe>
+<script>document.rootScroller = document.querySelector('#myIframe');</script>
+```
+
+The browser uses whichever element the document in the iframe set as the document.rootScroller (remember, if none
+is set it defaults to the `document.scrollingElement`). This nesting works recursively; the iframe could itself set
+a child iframe as rootScroller. In this way, the root-most document can delegate root scroller responsibilities to
+child documents.
 
 
 ### Example
@@ -85,7 +104,9 @@ DOM all along? Here's an example of how we'd do that with this proposal:
 *Thanks to Dima Voytenko for the 
 [MiniApp example](https://docs.google.com/document/d/11kwtjxXelqsIELtHfXDWLWVPrdGJGdy4yvHu-2mGyn4/edit#heading=h.kho1ejnoqhs7),
 upon which this is based. This example comes from his experience in trying to make
-this work in G+, Google Photos, and the AMP project.*
+this work in G+, Google Photos, and the AMP project. See also (with
+chrome://flags/#enable-experimental-web-platform-features enabled) my
+[conversion of MiniApp](http://bokand.github.io/totese.html) to work with document.rootScroller.*
 
 Here's the markup:
 
