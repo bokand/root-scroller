@@ -33,6 +33,9 @@ special element: the documentElement (&lt;html>). Here are some examples of how
     scrollable.
   * Spacebar to Scroll - Many browsers use the spacebar as a shortcut to
     scroll down by a page. This often only works for the documentElement.
+  * Tapping top of browser chrome - To allow the user to quickly scroll back
+    to the top of the container. Any mobile browser doesn't allow this when
+    the documentElement isn't scrollable.
 
 Thus, authors have a choice: use the intuitive method and lose all these
 essential UX features, or swap the *content* of each view in and out of the
