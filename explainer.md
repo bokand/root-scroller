@@ -65,6 +65,20 @@ be treated as the root scroller and, importantly, *when*. This will go some way 
 *explaining* how the page interacts with browser UI and give authors a some ways to
 control those interactions.
 
+## Why not a heuristic?
+
+One alternate proposal is to apply these "root scroller" semantics to any scroller
+that exactly fills the viewport. This avoid introducing a new API. While this may
+work for some situations, it doesn't enable all the kinds of use cases we want to
+support. For example, in the example below, we overlay one viewport-sized scroller
+over another and cross-fade between the two. It's less clear which scroller we
+should designate in this case. 
+
+Using a heuristic would make it difficult to spec out all the edge cases and make
+interop between browsers more difficult. It also means authors couldn't feature
+detect. It's also less future friendly as we may wish to (in a future version of
+the API) allow non-fullscreen root scrollers.
+
 ## Proposed API
 
   * Add a `rootScroller` attribute on `document`.
