@@ -68,9 +68,9 @@ control those interactions.
 ## Why not a heuristic?
 
 One alternate proposal is to apply these "root scroller" semantics to any scroller
-that exactly fills the viewport. This avoid introducing a new API. While this may
+that exactly fills the viewport. This avoids introducing a new API. While this may
 work for some situations, it doesn't enable all the kinds of use cases we want to
-support. For example, in the example below, we overlay one viewport-sized scroller
+support. In the example below, we overlay one viewport-sized scroller
 over another and cross-fade between the two. It's less clear which scroller we
 should designate in this case. 
 
