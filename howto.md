@@ -23,7 +23,7 @@ become "effective" for a document, it must meet some conditions. It must:
 
   - Be parented in the document's DOM. The document must be active and attached
     to a frame.
-  - Be a `display: block` element (i.e. &lt;div&gt; or &lt;iframe&gt;.
+  - Be a `display: block` element (i.e. &lt;div&gt; or &lt;iframe&gt;).
   - Exactly match the initial containing block rect. That is:
     ```
     width: 100%;
