@@ -36,7 +36,7 @@ become "effective" for a document, it must meet some conditions. It must:
     &lt;iframe&gt;.
 
 If the `document.rootScroller` fails to meet any of these conditions, it will
-simply not be "effective". In other words, reading document.rootScroller will
+simply not be "effective". In other words, reading `document.rootScroller` will
 still return it but scrolling it won't have any special behavior; it'll behave
 as if it was never set (and we implicitly treat the root &lt;html&gt; element
 as the "effective"). However, as soon as it does meet the above criteria it'll
