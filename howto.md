@@ -3,19 +3,27 @@
 This document is a guide on how to use the experimental document.rootScroller
 API in Chrome.
 
-First of all, as of this writing (August 16, 2017) this is a bleeding-edge API.
+## Prerequisites
+
+As of this writing (August 16, 2017) this is a bleeding-edge API.
 document.rootScroller in Chrome versions prior to 62.0.3187.0 may be severely
 broken in some ways so make sure you're on a newer version (use Canary
 channel).
+
+You'll also have to turn the feature on manually, either by passing the
+`--enable-blink-features=SetRootScroller` flag or by enabling all experimental
+Blink features from:
+[chrome://flags/#enable-experimental-web-platform-features](chrome://flags/#enable-experimental-web-platform-features)
 
 ## Basics
 
 Setting the rootScroller means that the page will constantly try to use it to
 perform viewport scrolling actions. However, in order for a rootScroller to
-become "effective", it must meet some conditions. It must:
+become "effective" for a document, it must meet some conditions. It must:
 
-  - Be parented in the DOM in an attached/active Document.
-  - Be a `display: block` Element (i.e. &lt;div&gt; or &lt;iframe&gt;.
+  - Be parented in the document's DOM. The document must be active and attached
+    to a frame.
+  - Be a `display: block` element (i.e. &lt;div&gt; or &lt;iframe&gt;.
   - Exactly match the initial containing block rect. That is:
     ```
     width: 100%;
@@ -24,26 +32,30 @@ become "effective", it must meet some conditions. It must:
     left: 0;
     top: 0;
     ```
-  - If it isn't an &lt;iframe&gt; it must be potentially scrollable (i.e.
-    `overflow: auto`)
+  - Be potentially scrollable (i.e.  `overflow: auto`) if it isn't an
+    &lt;iframe&gt;.
 
 If the `document.rootScroller` fails to meet any of these conditions, it will
 simply not be "effective". In other words, it won't have any special behavior
-and it'll be as if it was never set (and we implicitly treat the root
-&lt;html&gt; Element as the "effective"). However, as soon as it does meet the
+and it'll behave as if it was never set (and we implicitly treat the root
+&lt;html&gt; element as the "effective"). However, as soon as it does meet the
 above criteria it'll become "effective" and take over viewport scrolling
 actions.
 
+_Note: There is no way to read which element is currently the "effective"
+rootScroller for a document. It may or may not be the document.rootScroller,
+depending on whether it meets the above criteria_
+
 ## Designating a RootScroller
 
-Each document on a page has a rootScroller attribute. It's initial value is
-null. If a document doesn't set a rootScroller, we default to using the
-&lt;html&gt; Element as the "effective" rootScroller, meaning that scrolling it
+Each document on a page has a rootScroller attribute. Its initial value is
+`null`. If a document doesn't set a rootScroller, we default to using the
+&lt;html&gt; element as the "effective" rootScroller, meaning that scrolling it
 will cause viewport actions. This is the existing behavior today without the
 API.
 
 To designate a non-&lt;html&gt; rootScroller, we simply need to set the
-attribute to an Element in the document's DOM tree.
+attribute to an element in the document's DOM tree.
 
 ```
 <div id="scroller"></div>
@@ -53,22 +65,24 @@ attribute to an Element in the document's DOM tree.
 ```
 
 That's it! As soon as #scroller meets all the criteria outlined above,
-scrolling it will perform viewport actions.
+scrolling it will perform viewport actions for its document/frame.
 
 ## Composition
 
 The rootScroller can be nested. If an &lt;iframe&gt; becomes the effective
-rootScroller in a Document, the "global" rootScroller for the page is
+rootScroller in a document, the "global" rootScroller for the page is
 calculated by using the "effective" rootScroller from inside the
 &lt;iframe&gt;. This is recursive and works from top down.
 
-For example, to determine which Element's scrolling will perform viewport
-actions (i.e. which Element is the "global" rootScroller), we start from the
-top-level Document. If it has an effective rootScroller that isn't an
+For example, to determine which element's scrolling will affect the URL bar
+(i.e. which element is the "global" rootScroller), we start from the
+top-level document. If it has an effective rootScroller that isn't an
 &lt;iframe&gt;, use that as the global. If its effective is an &lt;iframe&gt;,
-then we use the effective rootScroller of the Document _inside_ the
+then we use the effective rootScroller of the document _inside_ the
 &lt;iframe&gt;. We repeat this process in the until we reach a
 non-&lt;iframe&gt; effective.
+
+Put another way, the effective rootScrollers _chain_ across iframes.
 
 ## Example
 
