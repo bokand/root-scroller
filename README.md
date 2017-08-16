@@ -9,3 +9,9 @@ the
 [explainer doc](https://github.com/bokand/NonBodyRootScroller/blob/master/explainer.md)
 for a quick overview.
 
+## HOTWO
+
+For up-to-date API usage information in the current experimental implementation
+in Chrome, see [the user's
+guide](https://github.com/bokand/NonBodyRootScroller/blob/master/howto.md).
+
