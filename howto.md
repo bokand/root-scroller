@@ -34,6 +34,27 @@ and it'll be as if it was never set (and we implicitly treat the root
 above criteria it'll become "effective" and take over viewport scrolling
 actions.
 
+## Designating a RootScroller
+
+Each document on a page has a rootScroller attribute. It's initial value is
+null. If a document doesn't set a rootScroller, we default to using the
+&lt;html&gt; Element as the "effective" rootScroller, meaning that scrolling it
+will cause viewport actions. This is the existing behavior today without the
+API.
+
+To designate a non-&lt;html&gt; rootScroller, we simply need to set the
+attribute to an Element in the document's DOM tree.
+
+```
+<div id="scroller"></div>
+<script>
+  document.rootScroller = document.querySelector('#scroller');
+</script>
+```
+
+That's it! As soon as #scroller meets all the criteria outlined above,
+scrolling it will perform viewport actions.
+
 ## Composition
 
 The rootScroller can be nested. If an &lt;iframe&gt; becomes the effective
