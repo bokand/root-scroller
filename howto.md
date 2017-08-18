@@ -61,7 +61,9 @@ attribute to an element in the document's DOM tree.
 ```
 <div id="scroller"></div>
 <script>
-  document.rootScroller = document.querySelector('#scroller');
+  // Don't forget to feature-detect!
+  if ("rootScroller" in document)
+    document.rootScroller = document.querySelector('#scroller');
 </script>
 ```
 
