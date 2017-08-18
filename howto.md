@@ -44,7 +44,8 @@ become "effective" and take over viewport scrolling actions.
 
 _Note: There is no way to read which element is currently the "effective"
 rootScroller for a document. It may or may not be the document.rootScroller,
-depending on whether it meets the above criteria_
+depending on whether it meets the above criteria. (Maybe this is a good way
+to connect this to document.scrollingElement?)_
 
 ## Designating a RootScroller
 
