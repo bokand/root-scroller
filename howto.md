@@ -95,5 +95,9 @@ See https://bokand.github.io/rs/iframe.html for a simple nested example.
 
 See https://bokand.github.io/rs/nested.html for a multi-level nested example.
 
+See https://storage.googleapis.com/bokan/cors.html for a cross-origin iframe example.
+
 Note: Each page above nests the one above it. You can navigate from one to the
 next by starting from the first example.
+
+Original ["totese" test page](https://bokand.github.io/totese.html).
