@@ -1,6 +1,6 @@
-# Non-Document Root Scrollers
+# document.rootScrollers
 
-Non document root scrollers is a proposed feature that would allow an author to
+This is a proposed feature that would allow an author to
 endow an arbitrary scrolling element with the same specialness currently
 assigned to the documentElement.
 
