@@ -1,4 +1,4 @@
-# Non-Document Root Scrollers
+# root-scroller
 
 A proposal to allow any scroller to become the *root scroller*. Today's web
 endows the root element (i.e. the documentElement) with special powers (such
