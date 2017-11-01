@@ -50,6 +50,9 @@ since the animation must be timed carefully with the content swap. Simple
 behaviors which emerge naturally from using separate &lt;div>s become difficult
 and complicated to implement when forced to share the special documentElement.
 
+Want to see the problem in action? Go to photos.google.com or any AMP article.
+Notice that scrolling down doesn't hide the URL bar.
+
 ## Proposed Solution
 
 
