@@ -36,6 +36,7 @@ special element: the documentElement (&lt;html>). Here are some examples of how
   * Tapping top of browser chrome - iOS Safari has this to allow the user 
     to quickly scroll back to the top of the page but it targets only the
     documentElement.
+  * Anchoring scroll position on rotation
 
 Thus, authors have a choice: use the intuitive method and lose all these
 essential UX features, or swap the *content* of each view in and out of the
@@ -53,173 +54,89 @@ and complicated to implement when forced to share the special documentElement.
 Want to see the problem in action? Go to photos.google.com or any AMP article.
 Notice that scrolling down doesn't hide the URL bar.
 
-## Proposed Solution
+## The Root Scroller
 
+This proposal introduces the concept of a _root scroller_. This generalizes the
+special behaviors given today only to the documentElement to a single _root
+scroller_ on the page. By default, the documentElement is the page's _root
+scroller_, however, by changing which element is the _root scroller_, the
+special behaviors can be endowed to scrollers other than the documentElement.
 
+### Changing the Root Scroller
 
-We need to provide authors some way to make the intuitive "each view is a div"
-solution workable. This means giving an arbitrary scroller the same powers as
-the documentElement; anointing it the *root scroller*. Lets make the documentElement
-less special. The web is the only UI framework that gives special powers to one, and
-only one, special scrolling element.
+This proposal previously explored an explicit API to let the page designate the
+_root scroller_ element explicitly. Due to lack of interop interest, this API
+has been dropped in favour of an implicit approach. Should interest arise in an
+explicit API, this approach doesn't preclude resurrecting the API.
 
-I propose an explicit mechanism to allow the author to specify which element should
-be treated as the root scroller and, importantly, *when*. This will go some way to
-*explaining* how the page interacts with browser UI and give authors a some ways to
-control those interactions.
+### Implicit Root Scroller
 
-## Why not a heuristic?
+The alternative to an API is to let the browser automatically decide which
+element on a page should be the _root scroller_. We call this approach the
+_Implicit Root Scroller_.
 
-One alternate proposal is to apply these "root scroller" semantics to any scroller
-that exactly fills the viewport. This avoids introducing a new API. While this may
-work for some situations, it doesn't enable all the kinds of use cases we want to
-support. In the example below, we overlay one viewport-sized scroller
-over another and cross-fade between the two. It's less clear which scroller we
-should designate in this case. 
+There are certain criteria that an element must meet in order to be eligible
+for promotion to the _implicit root scroller_. These are designed for two
+purposes.
 
-Using a heuristic would make it difficult to spec out all the edge cases and make
-interop between browsers more difficult. It also means authors couldn't feature
-detect. It's also less future friendly as we may wish to (in a future version of
-the API) allow non-fullscreen root scrollers.
+The first is to ensure a consistent UX with existing documentElement
+scrolling. We may decide to loosen these restrictions in the future to allow
+a greater variety of scrollers to benefit from document scrolling UX.
 
-## Proposed API
+The second is to determine the semantically most important scroller on the
+page. In other words, the set of criteria and heuristics should pick a unique
+scroller on the page that's hosting the content the user currently cares about.
 
-  * Add a `rootScroller` attribute on `document`.
+The current set of criteria are as follows:
 
-```
-var myScrollerDiv = document.getElementById('myScrollerDiv');
-document.rootScroller = myScrollerDiv;
-```
+* The Element is connected to the DOM tree, is displayed and is of “box” type
+  (essentially, a display: block or <iframe>)
+* For non-iframe Elements, it must have an overflow clip
+* The Element must exactly fill the viewport. That is, it must be at location
+  (0, 0) and it’s size must match the viewport size exactly.
+* The Element must be user scrollable, have overflow, and be fully visible (e.g.
+  opacity: 1)
+* The Element must not have an ancestor that is scrollable or has any kind of
+  clipping or masking (e.g. overflow: hidden, clip-path, mask, etc.)
 
-If the set element is a valid(\*) scroller, scrolling it should perform all the same actions as the browser performs for document scrolling. E.g. hiding the URL bar, showing overscroll effects, pull-to-refresh, gesture effects, etc. If
-no element is set as the `document.rootScroller`, the browser defaults to using the `document.scrollingElement` and
-behavior is unchanged from today.
+Intuitively: if we notice the main document doesn’t have any scrollable content
+itself, but there is a screen-filling scroller that’s not “weird” in any way -
+the scroller is promoted to _root scroller_. In the rare case there are 
+multiple such candidates, neither is promoted.
 
-(\*) For some - yet undetermined - definition of valid. Chrome's experimental implementation requires the element to be scrollable and exactly fill the viewport.
+These criteria are reevaluated after a style or layout update so that the
+_root scroller_ must always meet these criteria.
 
+## Improved Functionality
 
-### \<iframes\>
+A major benefit of this feature is that authors can keep logically separate
+views in separate parts of the DOM. For example, a common app model is to have
+a stream of items from which users can open an item to view more details (e.g.
+a news stream). This app has a "stream view" and an "item view".
 
-When a page sets an \<iframe\> element as the root scroller, e.g:
+The intuitive structure of this app would be:
 
-```
-<iframe id="myIframe" src="..."></iframe>
-<script>document.rootScroller = document.querySelector('#myIframe');</script>
-```
+<div id="streamView">
+ ...
+</div>
+<div id="itemView" class="hidden">
+ ...
+</div>
 
-The browser uses whichever element the document in the iframe set as the document.rootScroller (remember, if none
-is set it defaults to the `document.scrollingElement`). This nesting works recursively; the iframe could itself set
-a child iframe as rootScroller. In this way, the root-most document can delegate root scroller responsibilities to
-child documents.
+When the user opens an item, the #itemView is populated and unhidden, perhaps
+with some animated transition.
 
+Without _root scroller_, this application would lose all the document-scrolling
+like URL bar hiding. With _implicit root scroller_, the currently in-view
+scroller automatically gets the document-scrolling UX (assuming the criteria
+above are met) without forcing authors to do DOM surgery.
 
-### Example
+## Status
 
-Here's a common application on the web: a (potentially-infinite) stream of items
-that lets you open one up when you click on it. Since the stream is infinite,
-navigating to a new page when you open an item means lots of work to recreate the
-stream when the user navigates back. What if we could keep the item-view in the
-DOM all along? Here's an example of how we'd do that with this proposal:
+This feature is currently implemented in Chrome and on track to ship by default
+in M73, see https://www.chromestatus.com/features/5162094739587072
 
-*Thanks to Dima Voytenko for the 
-[MiniApp example](https://docs.google.com/document/d/11kwtjxXelqsIELtHfXDWLWVPrdGJGdy4yvHu-2mGyn4/edit#heading=h.kho1ejnoqhs7),
-upon which this is based. This example comes from his experience in trying to make
-this work in G+, Google Photos, and the AMP project. See also (with
-chrome://flags/#enable-experimental-web-platform-features enabled) my
-[conversion of MiniApp](http://bokand.github.io/totese.html) to work with document.rootScroller.*
+## Examples
 
-Here's the markup:
-
-```html
-  <html>
-    <style>
-      body, html {
-        width: 100%;
-        height: 100%;
-      }
-      .view {
-        position: absolute;
-        top: 0px;
-        left: 0px;
-        width: 100%;
-        height: 100%;
-        z-index: 1;
-        overflow: auto;
-      }
-      .invisible {
-        visibility: hidden;
-        z-index: -1;
-      }
-      .transitioning {
-        z-index: -1;
-      }
-    </style>
-    <body>
-      <!--Notice: The body element itself has no scrolling, only the views scroll-->
-      <div id="streamView" class="view">
-        <div>
-          <!--CONTENT GOES HERE-->
-        </div>
-      </div>
-
-      <div id="itemView" class="view invisible">
-        <div id="backButton" class="button"></div>
-        <div id="itemContainer">
-          <!--CONTENT GOES HERE-->
-        </div>
-      </div>
-    </body>
-  </html>
-```
-
-And the script to make the transitioning happen:
-
-```javascript
-  var streamView = document.getElementById('streamView');
-  var itemView = document.getElementById('itemView');
-
-  // When the page loads, start with the stream view being the "root scroller".
-  document.rootScroller = streamView;
-
-  // Clicking on an item will fill the item view with the appropriate content
-  // and transition to the item view.
-  var itemInStream = document.getElementById('itemInStream');
-  itemInStream.addEventListener('click', function() {
-    // Populate the DOM in the item container using some helper function.
-    replaceContent(document.getElementById('item-container'), itemInStream);
-
-    // Transition to the item view, making it the root scroller.
-    transitionView(document.rootScroller, itemView);
-  });
-
-  // The back button in the item view will take us back to the stream view.
-  document.getElementById('backButton').addEventListener('click', function() {
-    transitionView(document.rootScroller, streamView);
-  });
-
-  // Note how simple this function is; most of it is details about how to fade
-  // and display the views. Since the views are siblings in the DOM and we don't
-  // have to move any DOM around it's a straightforward matter.
-  function transitionView(current, target) {
-    target.classList.remove('invisible');
-    target.classList.add('transitioning');
-    target.style.opacity = 0;
-    
-    var animation = new SequenceEffect([
-      new KeyframeEffect(current, [ {opacity: 1}, {opacity:0} ], {fill: 'forwards', duration: 500}),
-      new KeyframeEffect(target, [ {opacity: 0}, {opacity:1} ], {fill: 'forwards', duration: 500}),
-    ]);
-
-    document.timeline.play(animation).finished.then(function() {
-      // When the transition is complete, make the "current view" visible.
-      current.classList.add('invisible');
-      target.classList.remove('transitioning');
-      current.style.opacity = 1;
-      target.style.opacity = 1;
-
-      // Mark the newly current view as the root scroller so it gets all the
-      // nice browser UX features.
-      document.rootScroller = target;
-    });
-  }
-```
+See http://bokand.github.io/rs/implicit.html for an example of an application
+layout that levarages the _implicit root scroller_.
