@@ -128,10 +128,14 @@ The intuitive structure of this app would be:
 When the user opens an item, the #itemView is populated and unhidden, perhaps
 with some animated transition.
 
-Without _root scroller_, this application would lose all the document-scrolling
-like URL bar hiding. With _implicit root scroller_, the currently in-view
-scroller automatically gets the document-scrolling UX (assuming the criteria
-above are met) without forcing authors to do DOM surgery.
+Without _root scroller_, this application misses out on all the document-scrolling
+UX like URL bar hiding. Thus, today authors are forced to move all the scrollable
+content in and out of the documentElement.
+
+With _implicit root scroller_, the currently in-view scroller automatically gets
+the document-scrolling UX (assuming the criteria above are met) so the above DOM
+structure can be kept and only style needs to change. Authors are no longer
+forced perform DOM surgery to avoid losing UX features.
 
 ## Status
 
