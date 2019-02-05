@@ -116,12 +116,14 @@ a news stream). This app has a "stream view" and an "item view".
 
 The intuitive structure of this app would be:
 
+```
 <div id="streamView">
  ...
 </div>
 <div id="itemView" class="hidden">
  ...
 </div>
+```
 
 When the user opens an item, the #itemView is populated and unhidden, perhaps
 with some animated transition.
