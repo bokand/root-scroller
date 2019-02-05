@@ -142,3 +142,8 @@ in M73, see https://www.chromestatus.com/features/5162094739587072
 
 See http://bokand.github.io/rs/implicit.html for an example of an application
 layout that levarages the _implicit root scroller_.
+
+Note: pre-M73 and in other browsers, scrolling on either the stream or item
+view doesn't hide the URL bar or show the overscroll glow affordance. In M73,
+on both views the URL bar hides, overscroll glow is shown, and UX is as-if the
+view was the documentElement.
