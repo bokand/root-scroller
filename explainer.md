@@ -1,4 +1,4 @@
-# document.rootScrollers
+# Root Scroller
 
 This is a proposed feature that would allow an author to
 endow an arbitrary scrolling element with the same specialness currently
